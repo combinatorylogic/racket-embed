@@ -1,0 +1,6 @@
+FUN("debug-log", bDebugLog, void, ptr s)
+FUN("set_lookup", bSetLookup, void, ptr lv)
+FUN("get-rkt-bind-version", bGetVersionString, ptr)
+FUN("rkt-get-control-var", bGetControlVar, double, ptr ctx)
+FUN("rkt-get-ntick", bGetNTick, int, ptr ctx)
+FUN("rkt-set-control-parameter", bSetControlParameter, void, ptr ctx, double pv)

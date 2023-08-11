@@ -1,0 +1,89 @@
+* Embedding RacketCS into C / C++
+
+This project demonstrates embedding RacketCS, the native compiler for Racket 8.2+, into a
+C++ application.
+
+There is an abundance of examples of the opposite, of how to call C++ code from Racket, but very
+little material currently available covering the use of Racket (and in particular RacketCS) as
+an embedded interpreter.
+
+Feel free to use this project as a template for your Racket-based applications.
+
+** Why?
+
+Racket is a powerful programming language, and RacketCS provides an efficient
+natively compiled implementation. Scheme was traditionally used as an embedded
+interpreter (e.g. SIOD, Guile), and Racket is a good modern replacement.
+
+Compared to Guile, Racket has better language features and performance. It
+also has simpler deployment - just the =.boot= files are needed, no separate
+Racket installation required.
+
+** Real-time control
+
+This project demonstrates an embedded Racket script running alongside with a hard real-time
+C++ control code. This approach was extensively tested in practice - it's a simplified version of
+a system we used to control a quadruped robot.
+
+In this example, the pretend real-time thread simulates a controlled physical process, while
+Racket script implements a PID controller, which is not necessarily running in hard real-time -
+as in, it is ok for the scripted thread to skip a few ticks once in a while (and it does indeed
+when garbage collection kicks in).
+
+This kind of arrangement allows to mix a very time-sensitive, hard real-time control code with high level
+logic implemented in Racket or any complex eDSL working on top of Racket. Communication between the
+real-time thread and Racket worker thread is lock-free, allowing the real-time thread to run without
+context-switching. Racket GC does not disrupt the real-time thread, but may pause the Racket thread
+for a while.
+
+** Details
+
+Racket initialisation is in =bindings_racket.cpp=, =ScriptingWorker::init_racket=.
+
+At first, it does the usual loading of the three =.boot= files: =petite.boot=, =scheme.boot=
+and =racket.boot=.
+
+They can be shipped alongside with your code, or, if not found, are expected to be in =/usr/lib/racket=.
+
+Collections are expected to be in =/usr/share/racket/collects=, but are not really required, all the
+collections you need can be instead embedded into a single compiled blob. See how =zzzbase.h= file is
+created in =CMakeLists.txt=. Essentially, it's the following =raco= invocation:
+
+#+begin_src
+raco ctool --c-mods "${CMAKE_CURRENT_BINARY_DIR}/zzzbase.h" \
+    ++lib racket/base ++lib compatibility/defmacro \
+    ++lib racket/load ++lib racket/match ++lib ffi/unsafe/vm ++lib demo_common
+#+end_src
+
+Here, all the collections that must be embedded are listed, including the =demo_common= package that we
+compile from =src/bind/demo_common=, providing the bindings to C++ functions in this demo project.
+
+** Extra
+
+In addition to simply binding the functionality exposed from C++ to Racket, we show how to build eDSLs
+in two examples: a TOML configuration file compiler and a simple infix syntax extension for Scheme,
+see the implementations in =src/bind/demo_common=. Both eDSLs are immediately available to any script
+executed from the C++ wrapper. The PID controller demo application is using this TOML eDSL to configure
+the setpoint and PID parameters.
+
+Also, there's a little DSL (=bind/bindings.scm=) used to compile the =bindings.inc= file
+into =prims.scm=, the same =bindings.inc= is used with an X-macro on the C++ side of
+the bindings code.
+
+Another useful thing in this project is =scripts/build_racket.sh=. It can be used to bootstrap
+Racket, producing portable bytecode tarball in the process as a side effect, and then to build a
+cross-compiled aarch64 Racket using this tarball (see the =devenv= project for instruction on how
+to set up a fast cross-compilation environment). This script also downloads all the required collections
+locally and pre-compiles them, avoiding the potentially unwanted network-dependent behaviour of =raco=,
+which is important for reproducible builds. 
+
+** Building
+
+#+begin_src
+mkdir build
+cd build
+cmake ..
+make test      # run a test script
+make run_demo  # run a demo application
+#+end_src
+

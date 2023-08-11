@@ -1,0 +1,15 @@
+diff --git a/compatibility/info.rkt b/compatibility/info.rkt
+index d16eac9..7fc9854 100644
+--- a/compatibility/info.rkt
++++ b/compatibility/info.rkt
+@@ -2,8 +2,8 @@
+ 
+ (define collection 'multi)
+ 
+-(define deps '("compatibility-lib" "compatibility-doc"))
+-(define implies '("compatibility-lib" "compatibility-doc"))
++(define deps '("compatibility-lib"))
++(define implies '("compatibility-lib"))
+ 
+ (define pkg-desc "Libraries that implement legacy interfaces")
+ 

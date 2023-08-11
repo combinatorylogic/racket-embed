@@ -1,0 +1,9 @@
+setpoint = 85 # setpoint 85 degrees
+base_dt = 0.002 # 2 milliseconds time step
+min_output = 0
+max_output = 20
+# PID parameters:
+Kp = 100
+Kd = 0.01
+Ki = 0.001
+
