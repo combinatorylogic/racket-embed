@@ -2,8 +2,7 @@
 (require ffi/unsafe/vm)
 (require compatibility/defmacro)
 (require racket/match (for-syntax racket/match))
-(require demo_common demo_common/toml demo_common/infix
-         (for-syntax demo_common))
+(require demo_common (for-syntax demo_common))
 
 
 (define ns (current-namespace))

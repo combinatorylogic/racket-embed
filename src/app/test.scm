@@ -2,7 +2,7 @@
 (require ffi/unsafe/vm)
 (require compatibility/defmacro)
 (require racket/match (for-syntax racket/match))
-(require demo_common demo_common/toml demo_common/infix)
+(require demo_common)
 
 (define-syntax-rule  (set-toml! k v) (displayln (list k v)))
 
