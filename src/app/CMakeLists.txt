@@ -31,3 +31,18 @@ target_include_directories(racket_cmd PRIVATE
     ${CMAKE_SOURCE_DIR}/src/
     ${CMAKE_CURRENT_BINARY_DIR}/
     )
+
+install(DIRECTORY /usr/lib/racket
+        DESTINATION bin
+        FILES_MATCHING PATTERN *.boot
+        PATTERN "compiled*" EXCLUDE
+      )
+install(TARGETS racket_cmd demo RUNTIME DESTINATION bin)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/app/ DESTINATION bin
+  FILES_MATCHING
+  PATTERN "*.toml"
+  PATTERN "*.scm"
+  PATTERN "demo_common*" EXCLUDE
+)
+
+

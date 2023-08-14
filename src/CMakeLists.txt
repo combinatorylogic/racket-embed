@@ -119,6 +119,4 @@ target_link_libraries(bind
     ${RACKET_LIBRARIES}
   )
 
-install(DIRECTORY /usr/lib/racket DESTINATION bin FILES_MATCHING PATTERN *.boot )
-
 
