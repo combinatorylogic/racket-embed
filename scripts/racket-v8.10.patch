@@ -1,0 +1,66 @@
+diff --git a/Makefile b/Makefile
+index b07bd0fa4f..8ab715b0a5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -142,10 +142,11 @@ PKG_UPDATE_OPTIONS =
+ PLT_SETUP_OPTIONS =
+ 
+ # Catalog for package sources:
+-SRC_CATALOG = "https://download.racket-lang.org/releases/8.10/catalog/"
++SRC_CATALOG = "file://workdir/racket-packages"
+ 
+ # Built-in catalog for package sources (not meant to be configured):
+-DEFAULT_SRC_CATALOG = https://pkgs.racket-lang.org
++#DEFAULT_SRC_CATALOG = https://pkgs.racket-lang.org
++DEFAULT_SRC_CATALOG = toldyounofreakingcatalogs
+ 
+ # For -M, etc., to pick the target machine for compilation:
+ SETUP_MACHINE_FLAGS =
+@@ -238,7 +239,9 @@ native-bc-for-cross: $(ZUO)
+ 	$(RUN_ZUO) native-bc-for-cross $(BUILD_VARS)
+ 
+ local-catalog: $(ZUO)
+-	$(RUN_ZUO) local-catalog $(BUILD_VARS)
++	/workdir/tmp/usr/bin/raco pkg config -i --set catalogs file://workdir/racket-packages ""
++	/workdir/tmp/usr/bin/racket -l- pkg/dirs-catalog --check-metadata build/local/pkgs-catalog pkgs
++	ln -s /workdir/racket/build/local/pkgs-catalog build/local/catalog
+ 
+ # ------------------------------------------------------------
+ # pb update
+@@ -252,7 +255,7 @@ local-catalog: $(ZUO)
+ # change the origin of your "pb" checkout.
+ 
+ pb-fetch: $(ZUO)
+-	$(RUN_ZUO) pb-fetch $(BUILD_VARS)
++	echo "Don't fetch PB"
+ 
+ pb-build: $(ZUO)
+ 	$(RUN_ZUO) pb-build $(BUILD_VARS)
+@@ -631,7 +634,7 @@ win-test-client:  $(ZUO)
+ 	$(RUN_ZUO) test-client $(BUILD_VARS) $(DISTRO_BUILD_VARS)
+ 
+ fetch-pb: $(ZUO)
+-	$(RUN_ZUO) pb-fetch $(BUILD_VARS)
++	echo "No pb fetching for you"
+ 
+ ping: $(ZUO)
+ 	$(RUN_ZUO) ping $(BUILD_VARS)
+diff --git a/main.zuo b/main.zuo
+index db16b284cf..7855d72cba 100644
+--- a/main.zuo
++++ b/main.zuo
+@@ -293,10 +293,10 @@
+     (define loc-catalog (at-source "build/local/pkgs-catalog"))
+     (define unix-catalog (at-source "build/local/catalog"))
+     (process/wait racket "-l-" "pkg/dirs-catalog" "--check-metadata" loc-catalog "pkgs")
+-    (process/wait (or raco racket)
+-                  (if raco '() (list "-l-" "raco"))
+-                  "pkg" "catalog-copy" "--force" "--from-config" loc-catalog
+-                  unix-catalog)
++    ;(process/wait (or raco racket)
++    ;              (if raco '() (list "-l-" "raco"))
++    ;              "pkg" "catalog-copy" "--force" "--from-config" loc-catalog
++    ;              unix-catalog)
+     unix-catalog)
+ 
+   (define (setup vm . args)

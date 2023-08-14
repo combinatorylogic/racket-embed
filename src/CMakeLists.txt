@@ -19,7 +19,7 @@ execute_process(COMMAND git log -1 --format=%s
   ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(RACKET_LIBRARIES rkt_version "-lracketcs" "-ldl" "-lpthread" "-lncurses")
+set(RACKET_LIBRARIES rkt_version "-lracketcs" "-ldl" "-lpthread" "-lncurses" "-lz")
 
 
 add_custom_target(generate_prims_scm

@@ -4,18 +4,22 @@
 ## Build a Racket CS Unix-style system, avoiding pulling anything from a network in the process.
 ## A modified compatibility library removes the cascade dependencies it would have
 ## produced with compatibility-doc otherwise. Instead of pulling the existing PB boot files, we're building
-## them locally using a racket-bc build step. Tested with Racket v8.2 - v8.4.
+## them locally using a racket-bc build step. Tested with Racket v8.6-v8.10.
 ##
 ## There is an option for using a tarball with PB boot files (e.g., prepared for a cross-compilation)
+##
+## This script is supposed to be execuded in a Docker environment (at least base_devenv:1.0.0 layer) available from
+## https://github.com/combinatorylogic/devenv
+##
 
 ## Additional packages:
 #
 # cext-lib, dynext-lib, scheme-lib, rackunit-lib, sandbox-lib, testing-util-lib, srfi-lite-lib, errortrace-lib, source-syntax
 
 
-RACKET_VERSION=v${BLD_RACKET_VERSION}
+RACKET_VERSION=v8.10
 RACKET_SOURCE=/workdir/racket
-RACKET_PATCH=/root/racket.patch
+RACKET_PATCH=/root/racket-${RACKET_VERSION}.patch
 TARBALL_PATH=/workdir/racket-pb-${RACKET_VERSION}.tar
 PKGS_PATH=/workdir/racket-packages
 RACKET_GIT_PREFIX=https://github.com/racket/
@@ -112,7 +116,7 @@ then
 
     ## Bootstrap files
     cd $RACKET_SOURCE/racket/src/ChezScheme/
-    $RACKET_SOURCE/racket/bin/racketbc rktboot/main.rkt --machine pb
+    $RACKET_SOURCE/racket/bin/racketbc ../rktboot/main.rkt --machine pb
     (cd $RACKET_SOURCE; tar -cf $TARBALL_PATH racket/src/ChezScheme/boot/)
 fi
 
@@ -125,4 +129,6 @@ fi
 
 ## Build RacketCS with these bootstrap files
 cd $RACKET_SOURCE
+make PKGS="cext-lib compatibility" PREFIX="/usr/" DESTDIR="/workdir/tmp" local-catalog CPUS=8
 make PKGS="cext-lib compatibility" PREFIX="/usr/" DESTDIR="/workdir/tmp" unix-style CPUS=8
+
